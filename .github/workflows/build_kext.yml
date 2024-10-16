@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    name: Build
+    runs-on: macos-latest
+    permissions:
+      contents: write
+    env:
+      JOB_TYPE: BUILD
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: "recursive"
+      - run: rm -rf build/*
+      - run: xcodebuild -configuration Debug -arch x86_64 build
+      - run: xcodebuild -configuration Release -arch x86_64 build
+      - run: zip -q -r build/Debug/SimpleVGBE-DEBUG-DEV.zip build/Debug/*
+      - run: zip -q -r build/Release/SimpleVGBE-RELEASE-DEV.zip build/Release/*
+      - name: Upload to Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Artifacts
+          path: build/*/*.zip
+      - name: Upload build
+        uses: svenstaro/upload-release-action@2.9.0
+        if: github.event_name != 'pull_request'
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: build/*/*.zip
+          tag: ${{ github.event_name == 'release' && github.ref || 'nightly' }}
+          body: ${{ github.event_name != 'release' && github.event.head_commit.message || '' }}
+          file_glob: true
+          prerelease: ${{ github.event_name != 'release' }}
+          overwrite: true
