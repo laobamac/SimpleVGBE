@@ -21,7 +21,6 @@
 		ACB44D3929723F9B007B92AE /* igc_phy.c in Sources */ = {isa = PBXBuildFile; fileRef = ACB44D2329723F9B007B92AE /* igc_phy.c */; };
 		ACB44D3B29723F9B007B92AE /* igc_regs.h in Headers */ = {isa = PBXBuildFile; fileRef = ACB44D2529723F9B007B92AE /* igc_regs.h */; };
 		ACB44D3C29723F9B007B92AE /* igc_phy.h in Headers */ = {isa = PBXBuildFile; fileRef = ACB44D2629723F9B007B92AE /* igc_phy.h */; };
-		ACC51C6A299C886A007A4634 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = ACC51C69299C886A007A4634 /* README.md */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -44,7 +43,6 @@
 		ACB44D2529723F9B007B92AE /* igc_regs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = igc_regs.h; sourceTree = "<group>"; };
 		ACB44D2629723F9B007B92AE /* igc_phy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = igc_phy.h; sourceTree = "<group>"; };
 		ACB44D3F29724155007B92AE /* kcompat.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = kcompat.h; sourceTree = "<group>"; };
-		ACC51C69299C886A007A4634 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,7 +59,6 @@
 		ACB44CF82971C969007B92AE = {
 			isa = PBXGroup;
 			children = (
-				ACC51C69299C886A007A4634 /* README.md */,
 				ACB44D042971C969007B92AE /* SimpleVGBE */,
 				ACB44D032971C969007B92AE /* Products */,
 			);
@@ -184,7 +181,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				ACC51C6A299C886A007A4634 /* README.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
