@@ -4,7 +4,6 @@
 #include "kcompat.h"
 #include "igc_mac.h"
 #include "igc_nvm.h"
-
 /**
  * igc_poll_eerd_eewr_done - Poll for EEPROM read/write completion
  * @hw: pointer to the HW structure

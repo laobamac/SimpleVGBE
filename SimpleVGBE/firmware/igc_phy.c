@@ -536,7 +536,6 @@ out:
 	return ret_val;
 }
 
-
 /**
  * igc_read_phy_reg_mdic - Read MDI control register
  * @hw: pointer to the HW structure

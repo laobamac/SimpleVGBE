@@ -137,11 +137,9 @@ s32 igc_setup_link(struct igc_hw *hw)
 	hw->fc.current_mode = hw->fc.requested_mode;
 
 	hw_dbg("After fix-ups FlowControl is now = %x\n", hw->fc.current_mode);
-    
-    extern s32 igc_setup_copper_link_base(struct igc_hw *hw);
 
 	/* Call the necessary media_type subroutine to configure the link. */
-    ret_val = hw->mac.ops.setup_physical_interface(hw);
+	ret_val = hw->mac.ops.setup_physical_interface(hw);
 	if (ret_val)
 		goto out;
 

@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-2.0
 /* Copyright (c)  2018 Intel Corporation */
-
 #include "igc_hw.h"
 #include "igc_i225.h"
 #include "igc_mac.h"
 #include "igc_base.h"
 #include "igc.h"
+
 
 /**
  * igc_reset_hw_base - Reset hardware
@@ -103,7 +103,7 @@ static s32 igc_init_nvm_params_base(struct igc_hw *hw)
  * for link, once link is established calls to configure collision distance
  * and flow control are called.
  */
-s32 igc_setup_copper_link_base(struct igc_hw *hw)
+static s32 igc_setup_copper_link_base(struct igc_hw *hw)
 {
 	s32  ret_val = 0;
 	u32 ctrl;
@@ -394,11 +394,33 @@ void igc_rx_fifo_flush_base(struct igc_hw *hw)
 	rd32(IGC_MPC);
 }
 
-s32 igc_setup_copper_link_base(struct igc_hw *hw);
-
-s32 igc_null_ops_generic(struct igc_hw *hw)
+bool igc_is_device_id_i225(struct igc_hw *hw)
 {
-    return IGC_SUCCESS;
+	switch (hw->device_id) {
+	case IGC_DEV_ID_I225_LM:
+	case IGC_DEV_ID_I225_V:
+	case IGC_DEV_ID_I225_I:
+	case IGC_DEV_ID_I225_K:
+	case IGC_DEV_ID_I225_K2:
+	case IGC_DEV_ID_I225_LMVP:
+	case IGC_DEV_ID_I225_IT:
+		return true;
+	default:
+		return false;
+	}
+}
+
+bool igc_is_device_id_i226(struct igc_hw *hw)
+{
+	switch (hw->device_id) {
+	case IGC_DEV_ID_I226_LM:
+	case IGC_DEV_ID_I226_V:
+	case IGC_DEV_ID_I226_K:
+	case IGC_DEV_ID_I226_IT:
+		return true;
+	default:
+		return false;
+	}
 }
 
 static struct igc_mac_operations igc_mac_ops_base = {
