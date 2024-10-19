@@ -8,10 +8,10 @@
 	<string>????</string>
 	<key>IOKitPersonalities</key>
 	<dict>
-		<key>i225</key>
+		<key>I225</key>
 		<dict>
 			<key>CFBundleIdentifier</key>
-			<string>com.sxx.${PRODUCT_NAME}</string>
+			<string>com.laobamac.${PRODUCT_NAME}</string>
 			<key>IOClass</key>
 			<string>${PRODUCT_NAME}</string>
 			<key>IOPCIMatch</key>
@@ -23,10 +23,10 @@
 			<key>NETIF_F_TSO</key>
 			<false/>
 		</dict>
-		<key>i226</key>
+		<key>I226</key>
 		<dict>
 			<key>CFBundleIdentifier</key>
-			<string>com.sxx.${PRODUCT_NAME}</string>
+			<string>com.laobamac.${PRODUCT_NAME}</string>
 			<key>IOClass</key>
 			<string>${PRODUCT_NAME}</string>
 			<key>IOPCIMatch</key>

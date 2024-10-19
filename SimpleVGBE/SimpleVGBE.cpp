@@ -7579,7 +7579,7 @@ bool SimpleVGBE::configureInterface(IONetworkInterface *interface) {
         return false;
     }
 #endif
-    snprintf(modelName, kNameLength, "Intel(R) Ethernet Controller %s (IGC)", deviceModelNames[chip_idx].name);
+    snprintf(modelName, kNameLength, "Intel %s 2.5 Gbit Ethernet Controller (laobamac)", deviceModelNames[chip_idx].name);
     
     this->setProperty("Model", modelName);
     this->setProperty("IOModel", modelName);
