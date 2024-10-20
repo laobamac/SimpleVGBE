@@ -5,7 +5,8 @@ Intel 2.5G Ethernet driver for macOS. Based on I225 firmware in LinuxKernel V6.4
 macOS下英特尔2.5G网卡驱动
 
 移植自Ubuntu下的网卡驱动：I225 firmware in LinuxKernel V6.5rc
-* 正在计划移植V6.11、V6.8内核中的驱动，高中学业繁忙，请等待更新
+
+正在计划移植V6.11、V6.8内核中的驱动，高中学业繁忙，请等待更新
 
 传送门：LinuxKernel V6.5 [torvalds/linux](https://github.com/torvalds/linux/releases/tag/v6.5)
 
@@ -23,6 +24,6 @@ macOS下英特尔2.5G网卡驱动
 * 强制速率受`igc_ethtool_set_link_ksettings()`影响无法生效
 
 ## 鸣谢
-* [LinuxKernel]的(https://github.com/torvalds/linux) IGC驱动
+* [LinuxKernel](https://github.com/torvalds/linux) 的IGC驱动
 * @weachy帮助测试I226-V&I226-LM
 * @win10Q帮助测试I226-V
