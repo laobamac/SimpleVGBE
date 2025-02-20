@@ -1,10 +1,11 @@
 # SimpleVGBE
 
-Intel 2.5G Ethernet driver for macOS. Based on I225 firmware in LinuxKernel V6.4rc.
+Intel 2.5G Ethernet driver for macOS. Based on I225 firmware in LinuxKernel V6.5.
 
 macOS下英特尔2.5G网卡驱动
 
-移植自Ubuntu下的网卡驱动：I225 firmware in LinuxKernel V6.5rc
+~~移植自Ubuntu下的网卡驱动：I225 firmware in LinuxKernel V6.5rc~~
+20250220已同步到I225 Firmware in LinuxKernel V6.5
 
 正在计划移植V6.11、V6.8内核中的驱动，高中学业繁忙，请等待更新
 
@@ -25,5 +26,6 @@ macOS下英特尔2.5G网卡驱动
 
 ## 鸣谢
 * [LinuxKernel](https://github.com/torvalds/linux) 的IGC驱动
+* @Shaneee的[AppleIGB](https://github.com/Shaneee/AppleIGB)
 * @weachy帮助测试I226-V&I226-LM
 * @win10Q帮助测试I226-V

@@ -1,27 +1,17 @@
-/*
- Copyright © 2024 王孝慈
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
-
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #include <stdint.h>
 #include <stdatomic.h>
 #include <IOKit/pci/IOPCIDevice.h>
-#include <IOKit/IOTimerEventSource.h>
-#include <IOKit/IODeviceMemory.h>
-#include <IOKit/IOFilterInterruptEventSource.h>
-#include <IOKit/IOBufferMemoryDescriptor.h>
 #include <IOKit/network/IOEthernetController.h>
 #include <IOKit/network/IOEthernetInterface.h>
 #include <IOKit/network/IOGatedOutputQueue.h>
 #include <IOKit/network/IOMbufMemoryCursor.h>
 #include <IOKit/network/IOPacketQueue.h>
+#include <IOKit/IOTimerEventSource.h>
+#include <IOKit/IODeviceMemory.h>
+#include <IOKit/IOFilterInterruptEventSource.h>
+#include <IOKit/IOBufferMemoryDescriptor.h>
 
 extern "C" {
 #include <sys/kpi_mbuf.h>
@@ -65,13 +55,31 @@ static inline struct ip6_hdr* ip6_hdr(mbuf_t skb)
     return (struct ip6_hdr*)((u8*)mbuf_data(skb) + ETHER_HDR_LEN);
 }
 
-static inline struct tcphdr* tcp6_hdr(mbuf_t skb)
-{
+static inline struct tcphdr* tcp6_hdr(mbuf_t skb) {
     struct ip6_hdr* ip6 = ip6_hdr(skb);
-    while(ip6->ip6_ctlun.ip6_un1.ip6_un1_nxt != IPPROTO_TCP){
-        ip6++;
+    if (!ip6) return NULL;
+    
+    size_t pkt_len = mbuf_len(skb);
+    size_t offset = sizeof(struct ip6_hdr);
+    uint8_t next_header = ip6->ip6_ctlun.ip6_un1.ip6_un1_nxt;
+    
+    while (next_header != IPPROTO_TCP) {
+        if (offset + sizeof(struct ip6_ext) > pkt_len) {
+            return NULL;
+        }
+        struct ip6_ext* ext = (struct ip6_ext*)((uint8_t*)ip6 + offset);
+        next_header = ext->ip6e_nxt;
+        offset += (ext->ip6e_len + 1) * 8;
+
+        if (offset > pkt_len) {
+            return NULL;
+        }
     }
-    return (struct tcphdr*)(ip6+1);
+    
+    if (offset + sizeof(struct tcphdr) > pkt_len) {
+        return NULL;
+    }
+    return (struct tcphdr*)((uint8_t*)ip6 + offset);
 }
 
 static void* kzalloc(size_t size)
@@ -104,7 +112,7 @@ static void kfree(void* p, size_t size)
 
 static void* vzalloc(size_t size)
 {
-    void* p = IOMallocPageable(size, PAGE_SIZE);
+    void* p = IOMallocAligned(size, PAGE_SIZE);
     if(p){
         bzero(p, size);
     } else {
@@ -114,7 +122,7 @@ static void* vzalloc(size_t size)
 }
 
 static void vfree(void* p, size_t size) {
-    IOFreePageable(p, size);
+    IOFreeAligned(p, size);
 }
 
 static void netif_carrier_off(IOEthernetController* netdev){
@@ -1219,7 +1227,9 @@ static void igc_tx_csum(struct igc_ring *tx_ring, struct igc_tx_buffer *first,
         } else if(checksumDemanded & CSUM_TCPIPv6){
             type_tucmd |= IGC_ADVTXD_TUCMD_L4T_TCP;
             struct tcphdr* tcph = tcp6_hdr(skb);
-            mss_l4len_idx = (tcph->th_off << 2) << IGC_ADVTXD_L4LEN_SHIFT;
+            if (tcph != NULL) {
+                mss_l4len_idx = (tcph->th_off << 2) << IGC_ADVTXD_L4LEN_SHIFT;
+            }
         } else if(checksumDemanded & (IONetworkController::kChecksumUDP|CSUM_UDPIPv6)){
             mss_l4len_idx = sizeof(struct udphdr) << IGC_ADVTXD_L4LEN_SHIFT;
         }
@@ -1601,6 +1611,9 @@ static int igc_tso(struct igc_ring *tx_ring,
     } else {
         struct ip6_hdr *iph = ip6_hdr(skb);
         tcph = tcp6_hdr(skb);
+        if (tcph == NULL) {
+            return 0;
+        }
         ip_len = (int)((u8*)tcph - (u8*)iph);
         iph->ip6_ctlun.ip6_un1.ip6_un1_plen = 0;
         tcph->th_sum = in_pseudo6(iph, IPPROTO_TCP, 0);

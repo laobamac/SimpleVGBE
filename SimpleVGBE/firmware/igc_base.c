@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-2.0
 /* Copyright (c)  2018 Intel Corporation */
+
 #include "igc_hw.h"
 #include "igc_i225.h"
 #include "igc_mac.h"
 #include "igc_base.h"
 #include "igc.h"
-
 
 /**
  * igc_reset_hw_base - Reset hardware

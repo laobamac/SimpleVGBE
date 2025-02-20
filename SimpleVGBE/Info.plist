@@ -8,14 +8,14 @@
 	<string>????</string>
 	<key>IOKitPersonalities</key>
 	<dict>
-		<key>I225</key>
+		<key>i225</key>
 		<dict>
 			<key>CFBundleIdentifier</key>
-			<string>com.laobamac.${PRODUCT_NAME}</string>
+			<string>cn.laobamac.${PRODUCT_NAME}</string>
 			<key>IOClass</key>
 			<string>${PRODUCT_NAME}</string>
 			<key>IOPCIMatch</key>
-			<string>0x15f28086 0x15f38086 0x15f88086</string>
+			<string>0x15f28086 0x15f38086 0x15f88086 0x15f78086 0x31008086 0x31018086</string>
 			<key>IOProbeScore</key>
 			<integer>4000</integer>
 			<key>IOProviderClass</key>
@@ -23,14 +23,14 @@
 			<key>NETIF_F_TSO</key>
 			<false/>
 		</dict>
-		<key>I226</key>
+		<key>i226</key>
 		<dict>
 			<key>CFBundleIdentifier</key>
-			<string>com.laobamac.${PRODUCT_NAME}</string>
+			<string>cn.laobamac.${PRODUCT_NAME}</string>
 			<key>IOClass</key>
 			<string>${PRODUCT_NAME}</string>
 			<key>IOPCIMatch</key>
-			<string>0x125c8086 0x125b8086 0x125d8086 0x31028086</string>
+			<string>0x125c8086 0x125b8086 0x125d8086 0x31028086 0x55038086 0x0d9f8086 0x125f8086</string>
 			<key>IOProbeScore</key>
 			<integer>4000</integer>
 			<key>IOProviderClass</key>

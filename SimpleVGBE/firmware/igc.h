@@ -68,8 +68,8 @@ enum igc_mac_filter_type {
 struct igc_tx_queue_stats {
 	u64 packets;
 	u64 bytes;
-	//u64 restart_queue;
-	//u64 restart_queue2;
+	u64 restart_queue;
+	u64 restart_queue2;
 };
 
 struct igc_rx_queue_stats {
@@ -102,18 +102,18 @@ struct igc_ring_container {
 };
 
 struct igc_ring {
-    struct igc_q_vector *q_vector;  /* backlink to q_vector */
+	struct igc_q_vector *q_vector;  /* backlink to q_vector */
 #ifdef __APPLE__
     SimpleVGBE* netdev;
     IOBufferMemoryDescriptor* pool;
 #else
     struct net_device *netdev;      /* back pointer to net_device */
     struct device *dev;             /* device for dma mapping */
-#endif
-    union {                         /* array of buffer info structs */
-        struct igc_tx_buffer *tx_buffer_info;
-        struct igc_rx_buffer *rx_buffer_info;
-    };
+#endif           /* device for dma mapping */
+	union {                         /* array of buffer info structs */
+		struct igc_tx_buffer *tx_buffer_info;
+		struct igc_rx_buffer *rx_buffer_info;
+	};
 	void *desc;                     /* descriptor ring memory */
 	unsigned long flags;            /* ring specific flags */
 	void __iomem *tail;             /* pointer to ring tail register */
@@ -174,13 +174,15 @@ struct igc_adapter {
 #else
     struct net_device *netdev;
 #endif
-	
-	u16 eee_advert;
 
-	unsigned long state;
-	unsigned int flags;
-	unsigned int num_q_vectors;
+    //struct ethtool_eee eee;
+    u16 eee_advert;
 
+    unsigned long state;
+    unsigned int flags;
+    unsigned int num_q_vectors;
+
+    //struct msix_entry *msix_entries;
 
 	/* TX */
 	u16 tx_work_limit;
@@ -195,7 +197,6 @@ struct igc_adapter {
 	struct timer_list watchdog_timer;
 	struct timer_list dma_err_timer;
 	struct timer_list phy_info_timer;
-	//struct hrtimer hrtimer;
 
 	u32 wol;
 	u32 en_mng_pt;
@@ -218,9 +219,10 @@ struct igc_adapter {
     struct work_struct watchdog_task;
     struct work_struct dma_err_task;
 #endif
-    bool fc_autoneg;
     
-    u8 tx_timeout_factor;
+	bool fc_autoneg;
+
+	u8 tx_timeout_factor;
 
 	int msg_enable;
 	u32 max_frame_size;
@@ -233,16 +235,20 @@ struct igc_adapter {
 	u32 qbv_config_change_errors;
 	bool qbv_transition;
 	unsigned int qbv_count;
-    bool qbv_enable;
 	/* Access to oper_gate_closed, admin_gate_closed and qbv_transition
 	 * are protected by the qbv_tx_lock.
 	 */
+
+	/* OS defined structs */
 #ifdef __APPLE__
     IOPCIDevice* pdev;
 #else
     struct pci_dev *pdev;
 #endif
-
+    /* lock for statistics */
+    //spinlock_t stats64_lock;
+    //struct rtnl_link_stats64 stats64;
+    
 	/* structs defined in igc_hw.h */
 	struct igc_hw hw;
 	struct igc_hw_stats stats;
@@ -264,7 +270,10 @@ struct igc_adapter {
 	/* Any access to elements in nfc_rule_list is protected by the
 	 * nfc_rule_lock.
 	 */
-
+    //struct mutex nfc_rule_lock;
+    //struct list_head nfc_rule_list;
+    //unsigned int nfc_rule_count;
+    
 	u8 rss_indir_tbl[IGC_RETA_SIZE];
 
 	unsigned long link_check_timeout;
@@ -359,6 +368,7 @@ extern char igc_driver_name[];
 #define IGC_MRQC_RSS_FIELD_IPV4_UDP	0x00400000
 #define IGC_MRQC_RSS_FIELD_IPV6_UDP	0x00800000
 
+#ifndef __APPLE__
 /* RX-desc Write-Back format RSS Type's */
 enum igc_rss_type_num {
 	IGC_RSS_TYPE_NO_HASH		= 0,
@@ -373,6 +383,19 @@ enum igc_rss_type_num {
 	IGC_RSS_TYPE_HASH_UDP_IPV6_EX	= 9,
 	IGC_RSS_TYPE_MAX		= 10,
 };
+#define IGC_RSS_TYPE_MAX_TABLE		16
+#define IGC_RSS_TYPE_MASK		GENMASK(3,0) /* 4-bits (3:0) = mask 0x0F */
+
+/* igc_rss_type - Rx descriptor RSS type field */
+static inline u32 igc_rss_type(const union igc_adv_rx_desc *rx_desc)
+{
+	/* RSS Type 4-bits (3:0) number: 0-9 (above 9 is reserved)
+	 * Accessing the same bits via u16 (wb.lower.lo_dword.hs_rss.pkt_info)
+	 * is slightly slower than via u32 (wb.lower.lo_dword.data)
+	 */
+	return le32_get_bits(rx_desc->wb.lower.lo_dword.data, IGC_RSS_TYPE_MASK);
+}
+#endif
 
 /* Interrupt defines */
 #define IGC_START_ITR			648 /* ~6000 ints/sec */
@@ -523,6 +546,7 @@ struct igc_rx_buffer {
     u32 page_offset;
 };
 
+
 struct igc_q_vector {
 	struct igc_adapter *adapter;    /* backlink */
 	void __iomem *itr_register;
@@ -540,7 +564,8 @@ struct igc_q_vector {
 	struct net_device poll_dev;
 #ifdef    __APPLE__
     size_t alloc_size;
-#endif	/* for dynamic allocation of rings associated with this q_vector */
+#endif
+	/* for dynamic allocation of rings associated with this q_vector */
 	struct igc_ring ring[] ____cacheline_internodealigned_in_smp;
 };
 
@@ -637,14 +662,14 @@ enum igc_ring_flags_t {
 };
 
 #define ring_uses_large_buffer(ring) \
-    test_bit(IGC_RING_FLAG_RX_3K_BUFFER, &(ring)->flags)
+	test_bit(IGC_RING_FLAG_RX_3K_BUFFER, &(ring)->flags)
 #define set_ring_uses_large_buffer(ring) \
-    set_bit(IGC_RING_FLAG_RX_3K_BUFFER, &(ring)->flags)
+	set_bit(IGC_RING_FLAG_RX_3K_BUFFER, &(ring)->flags)
 #define clear_ring_uses_large_buffer(ring) \
-    clear_bit(IGC_RING_FLAG_RX_3K_BUFFER, &(ring)->flags)
+	clear_bit(IGC_RING_FLAG_RX_3K_BUFFER, &(ring)->flags)
 
 #define ring_uses_build_skb(ring) \
-    test_bit(IGC_RING_FLAG_RX_BUILD_SKB_ENABLED, &(ring)->flags)
+	test_bit(IGC_RING_FLAG_RX_BUILD_SKB_ENABLED, &(ring)->flags)
 
 #if 0
 static inline unsigned int igc_rx_bufsz(struct igc_ring *ring)
@@ -663,10 +688,10 @@ static inline unsigned int igc_rx_bufsz(struct igc_ring *ring)
 static inline unsigned int igc_rx_pg_order(struct igc_ring *ring)
 {
 #if (PAGE_SIZE < 8192)
-    if (ring_uses_large_buffer(ring))
-        return 1;
+	if (ring_uses_large_buffer(ring))
+		return 1;
 #endif
-    return 0;
+	return 0;
 }
 
 static inline s32 igc_read_phy_reg(struct igc_hw *hw, u32 offset, u16 *data)

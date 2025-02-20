@@ -4,6 +4,7 @@
 #include <libkern/libkern.h>
 #include "igc_hw.h"
 
+
 /**
  * igc_acquire_nvm_i225 - Acquire exclusive access to EEPROM
  * @hw: pointer to the HW structure
